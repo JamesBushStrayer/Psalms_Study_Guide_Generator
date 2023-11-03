@@ -21,7 +21,7 @@ except KeyError:
   exit(1)
 
 # Next up: 35, 88, 51 
-psalm = "35"
+psalm = "88"
 filename = f"Psalm_{psalm}.txt"
 prompts = (f"Write a very broad and generalized 5 to 6 sentence backgrounder on Psalm {psalm} based on the contextual aspects of the psalm, such as history, culture, and other points of relevance that may aid in the understanding of its origin and purpose.",
 f"Provide the full text of Psalm {psalm} using the King James Version, formatted for organizational clarity.",
