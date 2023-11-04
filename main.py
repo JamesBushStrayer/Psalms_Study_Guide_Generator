@@ -1,7 +1,7 @@
 import openai
 import os
 import sys
-  
+
 try:
   openai.api_key = os.environ['OPENAI_API_KEY']
 except KeyError:
@@ -20,28 +20,47 @@ except KeyError:
   """)
   exit(1)
 
-# Next up: 35, 88, 51 
-psalm = "88"
-filename = f"Psalm_{psalm}.txt"
-prompts = (f"Write a very broad and generalized 5 to 6 sentence backgrounder on Psalm {psalm} based on the contextual aspects of the psalm, such as history, culture, and other points of relevance that may aid in the understanding of its origin and purpose.",
-f"Provide the full text of Psalm {psalm} using the King James Version, formatted for organizational clarity.",
-f"Create a study guide for Psalm {psalm} that includes both a brief, one-sentence summary of each main point, an extended summary for each main point, a few questions that challenge the reader's understanding for each main point, and a series of questions that ask the reader to reflect on their own life experience for each main point.",
-f"Divine attributes. Identify the nature and divine attributes of God expressed by Psalm {psalm}. Explain the similarities in as much detail as possible.",
-f"Draw connections between the person and teachings of Jesus Christ and His Apostles and Psalm {psalm}, particularly, as they resonate with him and the themes and main points of the psalm in as much detail as possible. Include supporting Bible verses for every connection made. Also, draw parallels between the words of Jesus and His Apostles and verses in this psalm, if any.",
-f"List all of the psalms that are identical or highly similar to Psalm {psalm}, whether in part or in whole. Explain the similarities in as much detail as possible.",
-f"Answer the Understanding Questions posed in the study guide (but not the Reflective Questions). Just list the questions, followed by the answers."
-)
-
-for prompt in prompts:
-  response = openai.ChatCompletion.create(
-    model="gpt-4",
-    messages=[
-          {"role": "system", "content": prompt}
-      ]
+psalms = ("40", "10", "12", "23", "35", "38", "41", "88", "139", "141")
+for psalm in psalms:
+  filename = f"Psalm_{psalm}.txt"
+  conversation_history = []
+  prompts = (
+    f"Write a 5 to 6 sentence introduction to the spiritual and emotional elements of Psalm {psalm}, and try to connect its meaning and purpose with that of Christian faith.",
+    f"Provide the full text of Psalm {psalm} using the King James Version, formatted for organizational clarity.",
+    f"Create a study guide for Psalm {psalm} that includes both a brief, one-sentence summary of each main point along with the Bible verses they correspond to (be sure to cover every verse in the psalm; do not call the summary “main point”; include the verses being summarized at the end), an extended summary for each main point (do not label the extended summary),  questions that challenge the reader's understanding of each main point (label the challenge questions, “EVALUATE”; omit the colon), and a few questions that ask the reader to reflect on their own life experience for each main point (label the reflection questions, “REFLECT”; omit the colon). Provide answers to the challenge questions, but not the questions for reflection.",
+    f"Describe all the ways Psalm {psalm} embodies or reflects God’s nature in two sections: 1. divine (incommunicable) attributes; and, 2. communicable  attributes. Include biblical references, if applicable.",
+    f"Relate the person and teachings of Jesus Christ and Psalm {psalm}, particularly, as the pertain to the gospel. Include supporting Bible verses for every connection made, especially if there is a match between the words of Jesus and verses in this psalm.",
+    f"List all of the psalms that are identical or highly similar to Psalm {psalm}, whether in part or in whole. Explain the similarities in as much detail as possible."
   )
-  print(response.choices[0].message.content)
-  # # Open the file in write mode
-  with open(filename, "a") as file:
-    # Write the response to the file
-    file.write(str(response.choices[0].message.content))
 
+  for prompt in prompts:
+    conversation_history.append({"role": "user", "content": prompt})
+    response = openai.ChatCompletion.create(
+      model="gpt-4",
+      messages=conversation_history,
+ #     max_tokens=400,
+      temperature=1,
+      top_p=1,
+      n=3
+    )
+    # Append the AI's response to the conversation history
+    conversation_history.append({
+      "role":
+      "user",
+      "content":
+      response.choices[0].message["content"]
+    })
+
+    # Optional: Print the conversation as it goes
+    print(str(f"User: {prompt}") +
+    '\n\n')
+    print(
+      str(f"AI: {response.choices[0].message['content']}") +
+      '\n\n-------------------------\n\n')
+    # print(str(response.choices[0].message.content) + '\n\n-------------------------\n\n')
+    # # Open the file in write mode
+    with open(filename, "a") as file:
+      # Write the response to the file
+      file.write(
+        str(response.choices[0].message.content) +
+        '\n\n-------------------------\n\n')
